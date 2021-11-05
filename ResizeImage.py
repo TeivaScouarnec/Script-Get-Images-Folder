@@ -1,48 +1,72 @@
 import os
-from typing import Tuple
 from PIL import Image
 
-ActualFolder = os.path.dirname(__file__)
+Size : int = 128,128
+PathFol : str
 
-print ("[Script] The actual folder is: " + str((ActualFolder).split("img")))
-
+#Commences le script
+def start():
+    print("[Script] Quel est le chemin du dossier que vous souhaitez? (exemple: 'C:/Users/')")
+    PathFol = str(input("Ecrivez le chemin de votre dossier: "))
+    print ("[Script] le chemin actuel du dossier est: " + PathFol)
+    rezise(PathFol)
+    
 #Obtiens les images qui sont dans le fichier où se trouve le script
-def GetFile():
-    FilesInFolder = os.listdir(ActualFolder)
+def GetFile(path1):
+    try: 
+        FilesInFolder = os.listdir(path1)
+    except os.error:
+        print ("[Script] Erreur la recherche du dossier, veuillez recommencer!")
+        print ("------------------------------------------------------------------")
+        return start()
     Files = []
-    print (("[Script] The files in folder is: ") + str(FilesInFolder))
     
     for a in FilesInFolder:
         if a.endswith((".png",".jpg")):
             Files.append(a)
-    print (("[Script] The images founds is: ") + str(Files))
-    
+    if len(Files) > 0:
+        print (("[Script] les images trouvées sont: ") + str(Files))
+    else:
+        print ("[Script] Dossier non trouvé")
     return Files
 
-#Ecris dans un fichier, les balises pour intégrer les élements
-def WriteFile(folder):
-    Resultat = "resultat.txt"
-    PathFolder = (str(ActualFolder).split("img"))
-    print(("[Script] The path of folder is: ") + str(PathFolder))
-    YearPathFolder = (str(ActualFolder).split("illustrations\\"))
-    f = open(str(ActualFolder) + "\\" + Resultat,"w")
+#Redimensionnes les images obtenus avec la func GetFile()
+def rezise(path1):
+    pictures = GetFile(path1)
+    if len(pictures) > 0 :
+        FolderThumbnails = '\\thumbnails\\'
+        try:
+            os.mkdir(path1 + FolderThumbnails)
+        except os.error:
+            print ("[Script] Dossier déjà existant!")
+        else:
+            print ("[Script] dossier Créé!")
+        print ("--------------------------------------------------------")
+        for pic in pictures:
+            picResize = Image.open(path1 +'\\' + str(pic))
+            picResize.thumbnail(size=Size)
+            picResize.save( path1 + FolderThumbnails + pic.split(".")[0] +"-thumbnail" + ".png","png")
+            print ("[Script] Vignettes crées et placer dans le dosier Thumbnails")
+            print ("--------------------------------------------------------")
+            restart()
+    else:
+        print("[Script] Erreur! Dossier ou image non trouvé!")
+        print ("--------------------------------------------------------")
+        restart()
 
-    for i in folder:
-        path = str(str("..\\img\\") + PathFolder[1] + '\\' + str(i)) 
+#Rejoues le script ou non
+def restart():
+    Choice = str(input("Voulez-vous réessayer? [y/n]"))
+    if Choice == ("y" or "Y"):
+        print ("--------------------------------------------------------")
+        return start()
+    elif Choice == ("n" or "N"):
+        return exit()
+    else:
+        return restart()
 
-        YearPath = YearPathFolder[1]
-        f.write(("<a href=" + "'" + path + "'" + str(" data-lightbox=") + "'" + YearPath + "'" + str(" data-title=") + "'" + str(i) + "'" + str("> <img class= ") + "'" + str("illustrations") + "'" + str(" src=") + "'" + path + "'" + str(" alt=") + "'" + str(i) + "'" + str("></a>" + "\n")))
-
-Size : int = 128,128
-
-def rezise():
-    pictures = GetFile()
-    for pic in pictures:
-        picResize = Image.open(str(pic))
-        picResize.thumbnail(size=Size)
-        picResize.save(pic.split(".")[0] +"-thumbnail" + ".png","png")
-
-rezise()
+# ---------------------------------------- #
+start()
 
 
 
